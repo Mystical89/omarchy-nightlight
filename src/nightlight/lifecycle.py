@@ -10,7 +10,7 @@ removes the plugin's state, leaving things as they were before.
 import shutil
 import time
 
-from . import config, hyprsunset, profiles
+from . import config, hyprsunset, indicators, profiles
 
 
 def enabled():
@@ -19,7 +19,12 @@ def enabled():
 
 def enable(settings):
     """Back up the user's hyprsunset.conf, generate ours and make sure
-    hyprsunset is running with it."""
+    hyprsunset is running with it.
+
+    Also hides Omarchy's own night light toggle from the bar, so a stray click
+    on it can't override the schedule. Returns how many indicators widgets were
+    changed (0 when the toggle wasn't there).
+    """
     conf = config.CONF
     moved_to = None
     if conf.exists() and not profiles.managed():
@@ -38,6 +43,12 @@ def enable(settings):
         raise
     if hyprsunset.pid() is None:
         hyprsunset.start()
+    try:
+        return indicators.hide()
+    except OSError:
+        # A read-only or locked shell.json must not fail the enable: the
+        # schedule works without the cosmetic fix.
+        return 0
 
 
 def disable():
@@ -48,6 +59,10 @@ def disable():
     config.OVERRIDE.unlink(missing_ok=True)
     config.SCHEDULE_STATE.unlink(missing_ok=True)
     config.PENDING_RESTORE.unlink(missing_ok=True)
+    try:
+        indicators.restore()
+    except OSError:
+        pass
     if not profiles.managed():
         return "nothing to restore: hyprsunset.conf isn't managed by the plugin"
     if config.CONF_BACKUP.exists():

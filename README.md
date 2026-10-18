@@ -46,18 +46,29 @@ To update, run `omarchy plugin update io.github.agkrishnendu.nightlight`, then
 `omarchy restart shell`. Without the restart, the shell's hot reload can leave
 the old copy of the widget running alongside the new one.
 
-### Remove the built-in night light toggle (recommended)
+### The built-in night light toggle is removed for you
 
 Omarchy's indicators widget has its own night light toggle, which switches
-between 4000K and 6500K and ignores the schedule. To hide it, list the other
-indicators on the `omarchy.indicators` entry in `~/.config/omarchy/shell.json`:
+between 4000K and 6500K and ignores the schedule. One click on it silently
+overrides the schedule until the next profile switch.
 
-```json
-{ "id": "omarchy.indicators", "items": ["Dictation", "ScreenRecording", "Reminder", "Dnd", "StayAwake"] }
+This fork removes it from the bar when you enable the plugin: every indicators
+widget in `~/.config/omarchy/shell.json` loses `NightLight` from its `items`
+list (the file is backed up once as `shell.json.pre-nightlight`, and only that
+key is touched). `nightlight-schedule disable` puts the list back exactly as it
+was.
+
+The `SUPER+CTRL+N` binding still runs the old toggle, because the plugin can't
+own a keybinding without rewriting `~/.config/hypr/bindings.lua`. `enable` prints
+the two lines to paste there:
+
+```lua
+hl.unbind("SUPER + CTRL + N")
+o.bind("SUPER + CTRL + N", "Night light", "omarchy-shell io.github.agkrishnendu.nightlight toggle")
 ```
 
-The `omarchy toggle nightlight` keybinding still works. A temperature set with
-it lasts until the next scheduled change.
+then `hyprctl reload`. `status --json` reports the state as
+`bar.nightLightToggleHidden`.
 
 ## Dependencies
 
@@ -185,6 +196,7 @@ src/nightlight/
   sun.py                    location lookup and sunset calculation
   hyprsunset.py             hyprctl IPC, starting and stopping hyprsunset
   lifecycle.py              enable (with consent) and disable (restore)
+  indicators.py             hiding Omarchy's own night light toggle in shell.json
   profiles.py               generating and reading hyprsunset.conf
   schedule.py               time logic over the daily profiles (no I/O)
   override.py               overrides and keeping them applied

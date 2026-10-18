@@ -48,10 +48,12 @@ class SandboxTest(unittest.TestCase):
             "CONF": root / "hypr/hyprsunset.conf",
             "CONF_BACKUP": root / "hypr/hyprsunset.conf.pre-nightlight",
             "WEATHER_LOC": root / "weather.json",
+            "SHELL_CONFIG": root / "omarchy/shell.json",
             "STATE": root / "state",
             "CACHE": root / "state/coords.json",
             "OVERRIDE": root / "state/override.json",
             "SCHEDULE_STATE": root / "state/schedule.json",
+            "INDICATORS_STATE": root / "state/indicators.json",
             "PENDING_RESTORE": root / "state/restore-pending.json",
         }
         for name, path in paths.items():

@@ -22,6 +22,16 @@ from . import config, hyprsunset, lifecycle, override, profiles, status
 
 NOT_ENABLED = "not enabled yet: run `nightlight-schedule enable` or use the bar popup"
 
+REBIND_HINT = """\
+hint: SUPER+CTRL+N still runs Omarchy's fixed 4000K/6500K toggle, which ignores
+  the schedule. Point it at this plugin instead, in ~/.config/hypr/bindings.lua:
+    hl.unbind("SUPER + CTRL + N")
+    o.bind("SUPER + CTRL + N", "Night light", "omarchy-shell io.github.agkrishnendu.nightlight toggle")
+  then run `hyprctl reload`."""
+
+TOGGLE_HIDDEN = ("hint: removed Omarchy's own Night Light toggle from {n} bar "
+                 "indicator widget(s); `nightlight-schedule disable` puts it back.")
+
 
 def sync(settings):
     """Everything the widget's poll needs; returns a problem string or None."""
@@ -100,6 +110,7 @@ def main(argv=None):
         return 0
 
     ok, problem = True, None
+    hidden = 0
     if args.cmd == "set":
         if args.value != "off" and not args.value.isdigit():
             p.error("value must be kelvin or 'off'")
@@ -114,12 +125,16 @@ def main(argv=None):
         override.enforce()
     elif args.cmd == "enable":
         try:
-            lifecycle.enable(profiles.resolve_settings(args))
+            hidden = lifecycle.enable(profiles.resolve_settings(args))
         except Exception as e:
             problem = str(e)
     elif args.cmd == "sync":
         problem = sync(profiles.resolve_settings(args))
 
     status.print_report(args.json, problem)
+    if args.cmd == "enable" and not problem and not args.json:
+        if hidden:
+            print(TOGGLE_HIDDEN.format(n=hidden))
+        print(REBIND_HINT)
     return 0 if ok else 1
 

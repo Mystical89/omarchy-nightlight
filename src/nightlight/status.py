@@ -3,7 +3,7 @@
 import json
 from datetime import datetime
 
-from . import hyprsunset, lifecycle, override, profiles, schedule
+from . import hyprsunset, indicators, lifecycle, override, profiles, schedule
 
 
 def report(problem=None):
@@ -35,6 +35,9 @@ def report(problem=None):
         } if ov else None,
         "profiles": [{"time": f"{m // 60:02d}:{m % 60:02d}", "temperature": k} for m, k in profs],
         "presets": sorted({k for _, k in profs if k is not None}, reverse=True),
+        # Whether the bar's own Night Light toggle is hidden, so the popup can
+        # explain why it disappeared
+        "bar": {"nightLightToggleHidden": indicators.hidden()},
     }
 
 
