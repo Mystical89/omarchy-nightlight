@@ -27,8 +27,14 @@ the night light is doing and lets you override it.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/agkrishnendu/omarchy-nightlight.git --enable
+omarchy plugin add https://github.com/Mystical89/omarchy-nightlight.git --enable
 ```
+
+This is a fork of
+[agkrishnendu/omarchy-nightlight](https://github.com/agkrishnendu/omarchy-nightlight)
+— see [This fork](#this-fork) for what it changes. It keeps the upstream
+plugin id `io.github.agkrishnendu.nightlight`, so installing it replaces an
+upstream copy and the bar entry keeps working.
 
 Then click the moon in the bar and choose **Enable sunset schedule**.
 
@@ -175,7 +181,8 @@ First give your `hyprsunset.conf` back. Either open the popup and click
 ```
 
 This moves `hyprsunset.conf.pre-nightlight` back into place, restarts
-hyprsunset with it, and deletes the plugin's state. If you had no
+hyprsunset with it, deletes the plugin's state and, in this fork, puts
+`NightLight` back into the bar's indicators list. If you had no
 `hyprsunset.conf` before, it removes the generated file and stops hyprsunset
 instead. Then remove the plugin:
 
@@ -183,6 +190,26 @@ instead. Then remove the plugin:
 omarchy plugin remove io.github.agkrishnendu.nightlight
 rm -rf ~/.local/state/nightlight-schedule   # optional: the cached location
 ```
+
+`omarchy plugin remove` only unloads the widget and deletes the folder; the bar
+entry stays in `shell.json`, so a later install brings it back.
+
+## This fork
+
+Fork of [agkrishnendu/omarchy-nightlight](https://github.com/agkrishnendu/omarchy-nightlight)
+that deals with Omarchy's own night light toggle for you:
+
+- `enable` removes `NightLight` from the `items` list of every indicators
+  widget in `~/.config/omarchy/shell.json` (the file is backed up once as
+  `shell.json.pre-nightlight`, and the previous lists are remembered in
+  `~/.local/state/nightlight-schedule/indicators.json`);
+- `disable` puts those lists back exactly as they were;
+- `enable` prints the two `bindings.lua` lines that point `SUPER+CTRL+N` at the
+  plugin popup — the plugin doesn't rewrite your keybindings on its own;
+- `status --json` reports the state as `bar.nightLightToggleHidden`.
+
+Everything else is upstream's. The new logic lives in
+`src/nightlight/indicators.py` and is covered by `tests/test_indicators.py`.
 
 ## Development
 
@@ -219,5 +246,222 @@ The tests point every path at a temporary directory and replace hyprsunset
 with a stub, so they never touch your screen or config.
 
 ## License
+
+[MIT](LICENSE)
+
+---
+
+## Русский
+
+Плагин shell для [Omarchy](https://omarchy.org): делает экран тёплым по
+местному закату, а не по фиксированному времени. Добавляет иконку в бар,
+которая показывает, что происходит с ночным режимом, и позволяет его
+переопределить.
+
+![Попап ночного режима](preview.png)
+
+- **Следует за солнцем.** Каждый день вычисляет закат для вашей локации и
+  планирует [hyprsunset](https://github.com/hyprwm/hyprsunset):
+  - 3400K на закате;
+  - 2700K через три часа;
+  - выключение в 07:00.
+
+  Всё это настраивается.
+- **Иконка в баре.** Луна появляется вечером или пока действует
+  переопределение; днём скрыта. Подсвечивается при активном переопределении и
+  показывает предупреждение, если hyprsunset перестал отвечать.
+- **Попап.** Расписание на сегодня, кнопки-пресеты (Выкл, запланированные
+  температуры), слайдер температуры и длительность переопределения: до
+  следующего изменения по расписанию, на час или до утра. *Resume schedule*
+  завершает переопределение.
+- **Переопределения живут до срока.** hyprsunset обычно сбрасывает ручную
+  температуру на следующем переключении; плагин переприменяет её, пока не
+  истечёт срок, в том числе после перезапуска hyprsunset.
+
+### Установка
+
+```bash
+omarchy plugin add https://github.com/Mystical89/omarchy-nightlight.git --enable
+```
+
+Это форк
+[agkrishnendu/omarchy-nightlight](https://github.com/agkrishnendu/omarchy-nightlight)
+(отличия — в разделе «Этот форк» ниже). ID плагина оставлен апстримным
+(`io.github.agkrishnendu.nightlight`), поэтому установка заменяет апстримную
+копию, а запись в баре продолжает работать.
+
+Затем нажмите на луну в баре и выберите **Enable sunset schedule**.
+
+**До включения плагин ничего не меняет.** Включение делает две вещи:
+
+1. Переносит `~/.config/hypr/hyprsunset.conf` в
+   `~/.config/hypr/hyprsunset.conf.pre-nightlight`.
+2. Заменяет этот файл сгенерированным расписанием, которое перезаписывается
+   каждый день по мере сдвига заката.
+
+Пока плагин не включён, луна висит в баре с приглашением к настройке, и плагин
+не трогает ни ваши файлы, ни hyprsunset.
+
+Обновление: `omarchy plugin update io.github.agkrishnendu.nightlight`, затем
+`omarchy restart shell` — без перезапуска hot reload может оставить старую
+копию виджета работать рядом с новой.
+
+#### Встроенный тумблер ночного режима убирается автоматически
+
+У виджета индикаторов Omarchy есть собственный тумблер ночного режима: он
+переключает 4000K и 6500K и ничего не знает о расписании. Один клик по нему
+молча переопределяет расписание до следующего переключения профиля.
+
+Этот форк убирает тумблер при включении плагина: у каждого виджета индикаторов
+в `~/.config/omarchy/shell.json` из списка `items` пропадает `NightLight`
+(файл однократно бэкапится как `shell.json.pre-nightlight`, трогается только
+этот ключ). `nightlight-schedule disable` возвращает список ровно как было.
+
+Биндинг `SUPER+CTRL+N` по-прежнему запускает старый тумблер: плагин не
+переписывает `~/.config/hypr/bindings.lua` сам. `enable` печатает две строки,
+которые нужно вставить туда:
+
+```lua
+hl.unbind("SUPER + CTRL + N")
+o.bind("SUPER + CTRL + N", "Night light", "omarchy-shell io.github.agkrishnendu.nightlight toggle")
+```
+
+затем `hyprctl reload`. Состояние видно в `status --json` как
+`bar.nightLightToggleHidden`.
+
+### Зависимости
+
+| Зависимость | Для чего | Заметки |
+|---|---|---|
+| [hyprsunset](https://github.com/hyprwm/hyprsunset) | Меняет температуру экрана | Идёт с Omarchy. Плагин запускает его, если тот не работает. |
+| `python3` | Скрипт расписания | Идёт с Omarchy. Только стандартная библиотека. |
+| `hyprctl`, `pgrep`, `pkill` | Общение с hyprsunset и его перезапуск | Идут с Hyprland и Arch. |
+| `uwsm-app` | Запуск hyprsunset в отдельном systemd-скоупе | Идёт с Omarchy. Без него — отсоединённый процесс. |
+| Сеть до [wttr.in](https://wttr.in) | Определение локации по IP | Только если в виджете погоды не задана локация. Результат кешируется. |
+
+### Использование
+
+| На иконке в баре | Что делает |
+|---|---|
+| Левый клик | Открыть попап |
+| Правый клик | Выключить до следующего изменения по расписанию или вернуть расписание, если действует переопределение |
+| Средний клик | Обновить |
+
+После включения иконка днём скрыта. Чтобы открыть попап всё равно, например с
+биндинга:
+
+```bash
+omarchy-shell io.github.agkrishnendu.nightlight open    # также: close, toggle, refresh, resume
+```
+
+### Настройки
+
+Правятся в панели настроек Omarchy или в записи плагина в `shell.json`:
+
+| Ключ | По умолчанию | Смысл |
+|---|---|---|
+| `eveningTemperature` | `3400` | Кельвины на закате |
+| `lateTemperature` | `2700` | Кельвины позже вечером |
+| `lateAfterMinutes` | `180` | Через сколько минут после заката переключаться на позднюю температуру; `0` отключает |
+| `offTime` | `"07:00"` | Когда фильтр выключается утром |
+
+Изменения применяются на следующей проверке виджета, в течение 30 секунд.
+
+#### Локация
+
+Плагин берёт локацию из виджета погоды Omarchy (клик по названию места в
+попапе погоды). Если её нет — определяет по IP через wttr.in и кеширует
+результат.
+
+### Командная строка
+
+Виджет — тонкая обёртка над `src/nightlight-schedule.py`, который можно
+запускать и самому:
+
+```bash
+S=~/.config/omarchy/plugins/io.github.agkrishnendu.nightlight/src/nightlight-schedule.py
+$S enable                         # бэкап hyprsunset.conf и запуск расписания
+$S status                         # сейчас 3400K, 2700K в 21:18
+$S set 2700 --until morning       # --until next | morning | 1h | 30m | HH:MM
+$S set off                        # выключить до следующего изменения
+$S resume                         # вернуться к расписанию
+$S restart                        # если hyprsunset перестал отвечать
+$S disable                        # вернуть ваш hyprsunset.conf
+$S status --json                  # то, что читает виджет
+```
+
+Чтобы сделать из него команду, поставьте симлинк в `PATH`:
+
+```bash
+ln -s ~/.config/omarchy/plugins/io.github.agkrishnendu.nightlight/src/nightlight-schedule.py ~/.local/bin/nightlight-schedule
+```
+
+### Как это работает
+
+- После включения плагин пишет `~/.config/hypr/hyprsunset.conf` с профилями на
+  день. Файл перезаписывается только при смене даты, настроек или локации, а
+  hyprsunset перезапускается только если файл действительно изменился.
+- Первая строка сгенерированного файла помечает его как файл плагина. Плагин
+  никогда не перезаписывает `hyprsunset.conf` без этой строки: если файл
+  заменило что-то другое (например `omarchy refresh`), плагин останавливается
+  и просит включить его заново.
+- Виджет запускает `nightlight-schedule sync` каждые 30 секунд и сразу после
+  каждого запланированного изменения. Когда плагин включён, `sync` делает три
+  вещи: запускает hyprsunset, если тот не работает; обновляет профили при
+  необходимости; переприменяет активное переопределение или повторяет
+  восстановление, которое не удалось.
+- Состояние лежит в `~/.local/state/nightlight-schedule/`: переопределение,
+  последние настройки и кешированные координаты. Файлы заменяются атомарно и
+  проверяются при чтении; файл, не соответствующий ожиданиям, откладывается
+  как `<имя>.bad` и пересобирается.
+- Завершение переопределения (`resume` или истечение срока) оставляет за
+  экраном запланированную температуру. Если hyprsunset её не принял, долг
+  сохраняется, и следующий `sync` пробует снова, а не оставляет
+  переопределение на экране до следующего изменения.
+- Утреннее время выключения ограничивает ночь: вечерний или поздний профиль,
+  попадающий на него или позже, отбрасывается. Если сам закат попадает на время
+  выключения, ночного окна в этот день нет.
+
+### Удаление
+
+Сначала верните свой `hyprsunset.conf`. Либо откройте попап и нажмите
+**Disable and restore hyprsunset.conf** (он попросит нажать дважды), либо
+запустите:
+
+```bash
+~/.config/omarchy/plugins/io.github.agkrishnendu.nightlight/src/nightlight-schedule.py disable
+```
+
+Это вернёт `hyprsunset.conf.pre-nightlight` на место, перезапустит hyprsunset с
+ним, удалит состояние плагина и — в этом форке — вернёт `NightLight` в список
+индикаторов бара. Если до плагина файла `hyprsunset.conf` не было, команда
+удаляет сгенерированный файл и останавливает hyprsunset. Затем удалите плагин:
+
+```bash
+omarchy plugin remove io.github.agkrishnendu.nightlight
+rm -rf ~/.local/state/nightlight-schedule   # опционально: кеш локации
+```
+
+`omarchy plugin remove` только выгружает виджет и удаляет каталог; запись в
+`shell.json` остаётся, поэтому повторная установка её вернёт.
+
+### Этот форк
+
+Форк [agkrishnendu/omarchy-nightlight](https://github.com/agkrishnendu/omarchy-nightlight),
+который сам разбирается со встроенным тумблером ночного режима Omarchy:
+
+- `enable` убирает `NightLight` из `items` каждого виджета индикаторов в
+  `~/.config/omarchy/shell.json` (файл однократно бэкапится как
+  `shell.json.pre-nightlight`, прежние списки запоминаются в
+  `~/.local/state/nightlight-schedule/indicators.json`);
+- `disable` возвращает эти списки ровно как было;
+- `enable` печатает две строки для `bindings.lua`, перенаправляющие
+  `SUPER+CTRL+N` на попап плагина — сам плагин биндинги не переписывает;
+- `status --json` сообщает состояние как `bar.nightLightToggleHidden`.
+
+Всё остальное — апстримное. Новая логика в `src/nightlight/indicators.py`,
+тесты — `tests/test_indicators.py`.
+
+### Лицензия
 
 [MIT](LICENSE)
