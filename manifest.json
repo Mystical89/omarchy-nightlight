@@ -3,7 +3,7 @@
   "id": "io.github.agkrishnendu.nightlight",
   "name": "Sunset Night Light",
   "version": "1.1.0",
-  "author": "krisag",
+  "author": "Mystical89 (based on krisag)",
   "license": "MIT",
   "description": "Night light that follows your local sunset, with a bar popup to see and override it",
   "kinds": [
