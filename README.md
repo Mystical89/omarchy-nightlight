@@ -1,4 +1,4 @@
-**English** | [Русский](#русский)
+**English** | [Русский](#russian)
 
 # Sunset Night Light for Omarchy
 
@@ -252,6 +252,8 @@ with a stub, so they never touch your screen or config.
 [MIT](LICENSE)
 
 ---
+
+<a id="russian"></a>
 
 ## Русский
 
