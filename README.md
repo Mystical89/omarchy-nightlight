@@ -1,3 +1,5 @@
+**English** | [Русский](#русский)
+
 # Sunset Night Light for Omarchy
 
 An [Omarchy](https://omarchy.org) shell plugin that warms your screen at your
@@ -252,6 +254,8 @@ with a stub, so they never touch your screen or config.
 ---
 
 ## Русский
+
+[↑ English](#sunset-night-light-for-omarchy)
 
 Плагин shell для [Omarchy](https://omarchy.org): делает экран тёплым по
 местному закату, а не по фиксированному времени. Добавляет иконку в бар,
