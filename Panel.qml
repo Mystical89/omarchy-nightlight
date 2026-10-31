@@ -33,9 +33,9 @@ Panel {
   // Hold applied by the preset/slider buttons; follows an active override.
   property string hold: "next"
   readonly property var holds: [
-    { value: "next", label: "Next change" },
-    { value: "1h", label: "1 hour" },
-    { value: "morning", label: "Morning" }
+    { value: "next", label: "Следующее изменение" },
+    { value: "1h", label: "1 час" },
+    { value: "morning", label: "Утро" }
   ]
 
   readonly property var override: status ? status.override : null
@@ -50,24 +50,24 @@ Panel {
   // by IPC during the day.
   readonly property bool shown: opened || (status !== null && (!enabled || status.night === true || override !== null))
 
-  function kelvin(k) { return k === null || k === undefined ? "Off" : k + "K" }
+  function kelvin(k) { return k === null || k === undefined ? "Выкл." : k + "K" }
 
   function heroStatusText() {
-    if (!status) return "Loading"
-    if (!enabled) return "Not set up"
-    if (status.problem && status.profiles.length === 0) return "No schedule"
-    if (!status.running) return "Not running"
-    if (!healthy) return "Not responding"
-    if (override) return "Override · until " + override.untilLabel
-    if (status.next) return "Schedule · " + kelvin(status.next.temperature) + " at " + status.next.time
-    return "Schedule"
+    if (!status) return "Загрузка"
+    if (!enabled) return "Не настроен"
+    if (status.problem && status.profiles.length === 0) return "Нет расписания"
+    if (!status.running) return "Не запущен"
+    if (!healthy) return "Не отвечает"
+    if (override) return "Переопределено · до " + override.untilLabel
+    if (status.next) return "Расписание · " + kelvin(status.next.temperature) + " в " + status.next.time
+    return "Расписание"
   }
 
   function tooltip() {
     if (!status) return ""
-    if (!enabled) return "Night light: click to set up the sunset schedule"
-    if (!healthy) return "Night light: hyprsunset not responding"
-    var text = "Night light " + kelvin(effective)
+    if (!enabled) return "Ночной свет: нажмите, чтобы настроить расписание заката"
+    if (!healthy) return "Ночной свет: hyprsunset не отвечает"
+    var text = "Ночной свет " + kelvin(effective)
     if (override) return text + " (override until " + override.untilLabel + ")"
     if (status.next) text += " · " + kelvin(status.next.temperature) + " at " + status.next.time
     return text
@@ -245,7 +245,7 @@ Panel {
             spacing: Style.space(2)
 
             Text {
-              text: "Night Light"
+              text: "Ночной свет"
               color: root.bar.foreground
               font.family: root.bar.fontFamily
               font.pixelSize: Style.font.title
@@ -299,12 +299,12 @@ Panel {
             wrapMode: Text.WordWrap
             text: root.status && root.status.running
               ? "hyprsunset is running but not answering, so the schedule can't be changed."
-              : "hyprsunset is not running."
+              : "hyprsunset не запущен."
           }
 
           Button {
             id: restartButton
-            text: root.status && root.status.running ? "Restart" : "Start"
+            text: root.status && root.status.running ? "Перезапустить" : "Запустить"
             fontSize: Style.font.bodySmall
             foreground: root.bar.foreground
             fontFamily: root.bar.fontFamily
@@ -324,18 +324,18 @@ Panel {
           InfoValue {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "Warm the screen from your local sunset, and override it from here."
+            text: "Согревает экран от местного заката; отсюда можно переопределить."
           }
 
           InfoLabel {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "Enabling backs up ~/.config/hypr/hyprsunset.conf to hyprsunset.conf.pre-nightlight and replaces it with a generated schedule. Disabling restores it."
+            text: "При включении ~/.config/hypr/hyprsunset.conf сохраняется в hyprsunset.conf.pre-nightlight и заменяется сгенерированным расписанием. При выключении восстанавливается."
           }
 
           Button {
             width: parent.width
-            text: actionProc.running ? "Enabling…" : "Enable sunset schedule"
+            text: actionProc.running ? "Enabling…" : "Включить расписание заката"
             fontSize: Style.font.bodySmall
             foreground: root.bar.foreground
             fontFamily: root.bar.fontFamily
@@ -357,7 +357,7 @@ Panel {
             spacing: Style.spacing.labelGap
 
             PanelSectionHeader {
-              text: "SCHEDULE"
+              text: "РАСПИСАНИЕ"
               foreground: root.bar.foreground
               fontFamily: root.bar.fontFamily
             }
@@ -394,7 +394,7 @@ Panel {
             spacing: Style.space(10)
 
             PanelSectionHeader {
-              text: "OVERRIDE"
+              text: "ВРУЧНУЮ"
               foreground: root.bar.foreground
               fontFamily: root.bar.fontFamily
             }
@@ -413,7 +413,7 @@ Panel {
                 Button {
                   required property var modelData
                   width: presetRow.cellWidth
-                  text: modelData === "off" ? "Off" : modelData + "K"
+                  text: modelData === "off" ? "Выкл." : modelData + "K"
                   fontSize: Style.font.bodySmall
                   foreground: root.bar.foreground
                   fontFamily: root.bar.fontFamily
@@ -478,7 +478,7 @@ Panel {
             Button {
               visible: root.override !== null
               width: parent.width
-              text: "Resume schedule"
+              text: "Вернуться к расписанию"
               fontSize: Style.font.bodySmall
               foreground: root.bar.foreground
               fontFamily: root.bar.fontFamily
@@ -492,7 +492,7 @@ Panel {
 
           Button {
             width: parent.width
-            text: root.confirmingDisable ? "Click again to restore your hyprsunset.conf" : "Disable and restore hyprsunset.conf"
+            text: root.confirmingDisable ? "Нажмите ещё раз, чтобы восстановить ваш hyprsunset.conf" : "Выключить и восстановить hyprsunset.conf"
             fontSize: Style.font.bodySmall
             foreground: root.bar.foreground
             fontFamily: root.bar.fontFamily
